@@ -1,46 +1,5 @@
 import os
-import logging
-
-logger = logging.getLogger(__name__)
-
-
-def check_key_and_bool(config: dict, key: str) -> bool:
-    """Check the existance of the key and if it's True
-
-    Args:
-        config (dict): dict.
-        key (str): Key name to be checked.
-
-    Returns:
-        bool: Return True only if the key exists in the dict and its value is True.
-            Otherwise returns False.
-    """
-    return key in config.keys() and config[key]
-
-
-def check_file_exists(filename: str) -> bool:
-    """Return True if the file exists.
-
-    Args:
-        filename (str): _description_
-
-    Returns:
-        bool: _description_
-    """
-    logger.debug(f"Check {filename}")
-    res = os.path.exists(filename)
-    if not res:
-        logger.warning(f"{filename} does not exist!")
-    return res
-
-
-def uniquify_dir(path):
-    filename, extension = os.path.splitext(path)
-    counter = 1
-    while os.path.exists(path):
-        path = f'{filename}-{counter}{extension}'
-        counter += 1
-    return path
+from contextlib import contextmanager
 
 COLORS = [
     (33, 150, 243),  # Blue
@@ -59,3 +18,47 @@ COLORS = [
     (255, 87, 34),   # Deep Orange
     (103, 58, 183)   # Deep Purple
 ]
+
+def check_key_and_bool(config: dict, key: str) -> bool:
+    """Check the existance of the key and if it's True
+
+    Args:
+        config (dict): dict.
+        key (str): Key name to be checked.
+
+    Returns:
+        bool: Return True only if the key exists in the dict and its value is True.
+            Otherwise returns False.
+    """
+    return key in config.keys() and config[key]
+
+def uniquify_dir(path):
+    filename, extension = os.path.splitext(path)
+    counter = 1
+    while os.path.exists(path):
+        path = f'{filename}-{counter}{extension}'
+        counter += 1
+    return path
+
+@contextmanager
+def suppress_stdout_stderr():
+    """Context manager to suppress stdout and stderr"""
+    # Save the current file descriptors
+    save_stdout = os.dup(1)
+    save_stderr = os.dup(2)
+    null_fd = os.open(os.devnull, os.O_RDWR)
+
+    # Redirect stdout and stderr to /dev/null
+    os.dup2(null_fd, 1)
+    os.dup2(null_fd, 2)
+
+    try:
+        yield
+    finally:
+        # Restore file descriptors
+        os.dup2(save_stdout, 1)
+        os.dup2(save_stderr, 2)
+        # Clean up
+        os.close(null_fd)
+        os.close(save_stdout)
+        os.close(save_stderr)

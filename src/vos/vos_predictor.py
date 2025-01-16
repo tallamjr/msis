@@ -38,7 +38,7 @@ CONFIG = config_dict = {
 
 
 class VosPredictor:
-    def __init__(self, initial_image, initial_mask: np.ndarray, model_path="models/XMem.pth") -> None:
+    def __init__(self, initial_image, initial_mask: np.ndarray, model_path="models/XMem.pth", device='cuda:0') -> None:
         """_summary_
 
         Args:
@@ -46,7 +46,8 @@ class VosPredictor:
             initial_mask: binary mask {0, 1} of object in first frame as numpy array (H, W).
             model_path: _description_. Defaults to "artifacts/XMem.pth".
         """
-        network = XMem(CONFIG, model_path).cuda().eval()
+        self.device = device
+        network = XMem(CONFIG, model_path).to(self.device).eval()
         model_weights = torch.load(model_path)
         network.load_weights(model_weights, init_as_zero_if_needed=True)
         self.processor = InferenceCore(network, config=CONFIG)
@@ -61,7 +62,7 @@ class VosPredictor:
     def _init_processor_with_mask(self, initial_image, initial_mask):
         assert initial_mask is not None
         
-        initial_mask = torch.from_numpy(initial_mask).float().cuda()[None]
+        initial_mask = torch.from_numpy(initial_mask).float().to(self.device)[None]
         labels = range(1, 2)  # only one label (mice) represented by '1'
         self.processor.set_all_labels([1])
 
@@ -77,7 +78,7 @@ class VosPredictor:
         Returns:
             binary prediction mask
         """
-        image = self.transform(image).cuda()
+        image = self.transform(image).to(self.device)
         
         prob = self.processor.step(image, gt_mask, labels, end=end)
 

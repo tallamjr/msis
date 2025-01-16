@@ -8,7 +8,6 @@ from __future__ import print_function
 import numpy as np
 
 from src.vos import VosPredictor
-from src.utils import get_bbox_from_mask
 
 np.random.seed(0)
 
@@ -157,7 +156,7 @@ class XMemSimpleMaskTracker(object):
   """
   count = 1
 
-  def __init__(self, mask, initial_image) -> None:
+  def __init__(self, mask, initial_image, device='cuda:0') -> None:
     self.state = mask
     self.image = initial_image
 
@@ -168,6 +167,7 @@ class XMemSimpleMaskTracker(object):
     self.hits = 0
     self.hit_streak = 0
     self.age = 0
+    self.device = device
 
   def update(self, new_mask, new_image):
     self.time_since_update = 0
@@ -179,7 +179,7 @@ class XMemSimpleMaskTracker(object):
     self.image = new_image
 
   def predict(self, image):
-    predictor = VosPredictor(self.image, self.state)
+    predictor = VosPredictor(self.image, self.state, device=self.device)
     pred_mask = predictor.step(image)
 
     self.image = image
@@ -198,7 +198,7 @@ class XMemSimpleMaskTracker(object):
 
 
 class XMemSort(object):
-  def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3):
+  def __init__(self, max_age=1, min_hits=3, iou_threshold=0.3, device='cuda:0'):
     """
     Sets key parameters for SORT
     """
@@ -208,6 +208,7 @@ class XMemSort(object):
     self.trackers = []
     self.frame_count = 0
     assert self.max_age > 0
+    self.device = device
 
   def update(self, detected_masks, curr_image):
     """Update the tracker by one step.
@@ -246,7 +247,7 @@ class XMemSort(object):
 
     # create and initialise new trackers for unmatched detections
     for i in unmatched_dets:
-        trk = XMemSimpleMaskTracker(detected_masks[i], curr_image)
+        trk = XMemSimpleMaskTracker(detected_masks[i], curr_image, device=self.device)
         self.trackers.append(trk)
 
     i = len(self.trackers)

@@ -11,3 +11,4 @@ transformers
 matplotlib
 event-vision-library
 pycocotools
+scikit-image

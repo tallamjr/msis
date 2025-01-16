@@ -1,6 +1,5 @@
 import numpy as np
 import cv2 as cv
-from scipy.sparse import coo_matrix
 
 def points_to_rle(image_shape, points):
     image = np.zeros(image_shape, dtype=np.uint8)

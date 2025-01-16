@@ -6,30 +6,56 @@
 
 This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice**](https://arxiv.org/pdf/2409.03358), accepted at the **Workshop on Neuromorphic Vision** in conjunction with **ECCV 2024** by [Friedhelm Hamann](https://friedhelmhamann.github.io/), [Hanxiong Li](), [Paul Mieske](https://scholar.google.de/citations?user=wQPmm6kAAAAJ&hl=de), [Lars Lewejohann](https://www.vetmed.fu-berlin.de/einrichtungen/vph/we11/mitarbeitende/lewejohann_lars3/index.html) and [Guillermo Gallego](https://sites.google.com/view/guillermogallego).
 
-👀 **Currently, the test set of this dataset is not available in preparation of a challenge (see split in the paper Tab. 2). You can still run our baseline method on the validation set and we'll soon provide access to an evaluation server. Stay tuned or in case of questions contact us!**
+👀 **This dataset the base for the SIS Challenge hosted in conjunction with the [CVPR 2025 Workshop on Event-based Vision](https://tub-rip.github.io/eventvision2025/).**
 
 <p align="center">
   <img src="./image/visualization_seq12_0003.jpg" alt="MouseSIS Visualization" width="600"/>
 </p>
 
+## Key Features
+- Space-time instance segmentation dataset focused on mice tracking
+- Combined frames and event data from neuromorphic vision sensor
+- 33 sequences (~20 seconds each, ~600 frames per sequence)
+- YouTubeVIS-style annotations
+- Baseline implementation and evaluation metrics included
+
+## Versions
+
+- **v1.0.0** (Current, February 2024): Major refactoring and updates, including improved documentation.
+- **v0.1.0** (September 2023): Initial release with basic functionality and dataset.
+
 ## Table of Contents
+- [Quickstart](#quickstart)
 - [Installation](#installation)
 - [Data Preparation](#data-preparation)
+    - [Data](#data)
+    - [Pretrained Weights](#pretrained-weights)
+    - [Preprocess Events](#preprocess-events)
 - [Evaluation](#evaluation)
-    - [Evaluation of ModelMixSORT](#evaluation-of-modelmixsort)
-    - [Evaluating Your Own Method](#evaluating-your-own-method)
-- [Training](#training)
+    - [Quickstart Evaluation](#quickstart-evaluation)
+    - [Evaluation on Full Validation Set](#evaluation-on-full-validation-set)
+    - [Evaluation on Test Set](#evaluation-on-test-set)
 - [Acknowledgements](#acknowledgements)
 - [Citation](#citation)
 - [Additional Resources](#additional-resources)
 - [License](#license)
 
+## Quickstart
+
+If you want to work with the dataset the quickest way to access the data and get an idea of it's structure is [downloading one sequence](https://drive.google.com/drive/folders/1amY4kuaZFWdpgHg4RfTrw9Qb-tKrM-8h?usp=drive_link) and the annotations of the according split and visualizing the data, e.g. `seq12.h5`:
+
+```bash
+python scripts/visualize_events_frames_and_masks.py --h5_path data/MouseSIS/top/val/seq12.h5 --annotation_path data/MouseSIS/val_annotations.json
+```
+
+This requires `h5py, numpy, Pillow, tqdm`. The full dataset structure is explained [here](docs/DATASET.md).
+
 ## Installation
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/tub-rip/MouseSIS_dev.git
-   cd MouseSIS_dev
+   git clone git@github.com:tub-rip/MouseSIS.git
+   cd MouseSIS
    ```
 
 2. Set up the environment:
@@ -38,7 +64,7 @@ This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for
    conda activate MouseSIS
    ```
 
-3. Install PyTorch (choose a command compatible with your CUDA version from the [PyTorch website](https://pytorch.org/get-started/locally/)):
+3. Install PyTorch (choose a command compatible with your CUDA version from the [PyTorch website](https://pytorch.org/get-started/locally/)), e.g.:
    ```bash
    conda install pytorch torchvision pytorch-cuda=12.1 -c pytorch -c nvidia
    ```
@@ -49,159 +75,221 @@ This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for
    ```
 
 ## Data Preparation
+
+### Data
+
 1. Create a folder for the original data
 
     ```bash
     cd <project-root>
-    mkdir -p data/orig
+    mkdir -p data/MouseSIS
     ```
 
-2. [Download the data and annotation](https://drive.google.com/drive/folders/1amY4kuaZFWdpgHg4RfTrw9Qb-tKrM-8h) and save it in `<project-root>/data/orig`.
-The `data/orig` folder should be organized as follows:
-
+2. [Download the data and annotation](https://drive.google.com/drive/folders/1amY4kuaZFWdpgHg4RfTrw9Qb-tKrM-8h) and save it in `<project-root>/data/MouseSIS`.
+**You do not necessarily need to download the whole dataset, e.g. you can only download the sequences needed for the sequences you want to evaluate on**.
+The `data/MouseSIS` folder should be organized as follows:
 
     ```txt
-    data/orig/
+    data/MouseSIS
     │
     ├── top/
-    │   ├── seq_01.hdf5
-    │   ├── seq_02.hdf5
-    │   ├── ...
-    │   └── seq_33.hdf5
-    │
+    │   ├── train
+    │   │   ├── seq_02.hdf5
+    │   │   ├── seq_05.hdf5
+    │   │   ├── ...
+    │   │   └── seq_33.hdf5
+    |   ├── val
+    │   │   ├── seq_03.hdf5
+    │   │   ├── seq_04.hdf5
+    │   │   ├── ...
+    │   │   └── seq_25.hdf5
+    │   └── test
+    │       ├── seq_01.hdf5
+    │       ├── seq_07.hdf5
+    │       ├── ...
+    │       └── seq_32.hdf5
     ├── dataset_info.csv
-    └── annotations.json
+    ├── val_annotations.json
+    └── train_annotations.json
     ```
 
     - **`top/`**: This directory contains the frame and event data for the Mouse dataset captured from top view, stored as 33 individual `.hdf5` files, each containing approximately 20 seconds of data (around 600 frames), along with temporally aligned events.
     - **`dataset_info.csv`**: This CSV file contains metadata for each sequence, such as recording dates, providing additional context and details about the dataset.
-    - **`annotations.json`**: The annotation file of top view follows a structure similar to MSCOCO's format in JSON, with some modifications.  The definition of json file is:
+    - **`<split>_annotations.json`**: The annotation file of top view for the respective splits follows a structure similar to MSCOCO's format in JSON, with some modifications. Note that the test annotations are not publicly available. The definition of json files is:
 
     ```txt
     {
         "info": {
-            "description": "string",  
-            "version": "string",  
-            "date_created": "string"  
+            "description": "string",     // Dataset description
+            "version": "string",         // Version identifier
+            "date_created": "string"     // Creation timestamp
         },
         "videos": [
             {
-                "id": "string", // video_id from "01" to "33"
-                "width": 1280,  // Width of the video in pixels
-                "height": 720,  // Height of the video in pixels
-                "length": "int"  // Number of frames in the video
+                "id": "string",          // Video identifier (range: "01" to "33")
+                "width": integer,        // Frame width in pixels (1280)
+                "height": integer,       // Frame height in pixels (720)
+                "length": integer        // Total number of frames
             }
         ],
         "annotations": [
             {
-                "id": "int",  // Instance number for the mouse
-                "video_id": "string",  // Corresponding video_id from "01" to "33"
-                "category_id": 1,  // The category ID for the object
+                "id": integer,           // Unique instance identifier
+                "video_id": "string",    // Reference to parent video
+                "category_id": integer,  // Object category (1 = mouse)
                 "segmentations": [
                     {
-                        "size": [720, 1280],  // Size of the segmentation mask
-                        "counts": "RLE encoded string or null"  // RLE encoded segmentation or null
+                        "size": [height: integer, width: integer],  // Mask dimensions
+                        "counts": "string"                          // RLE-encoded segmentation mask
                     }
                 ],
-                "areas": [0.0],  // Area of the object (can be null)
-                "bboxes": [[0.0, 0.0, 0.0, 0.0]],  // Bounding box for the object [x_min, y_min, width, height]
-                "iscrowd": 0  
+                "areas": [float],        // Object area in pixels
+                "bboxes": [              // Bounding box coordinates
+                    [x_min: float, y_min: float, width: float, height: float]
+                ],
+                "iscrowd": integer      // Crowd annotation flag (0 or 1)
             }
         ],
         "categories": [
             {
-                "id": 1,  
-                "name": "mouse", 
-                "supercategory": "animal"  
+                "id": integer,          // Category identifier
+                "name": "string",       // Category name
+                "supercategory": "string" // Parent category
             }
         ]
     }
-
     ```
 
-3. To evaluate the ModelMixSORT method or train the YOLO model used within it, you first need to convert the original dataset into YOLO format. 
-For grayscale frames, Please run the following command.
+### Pretrained Weights
 
-    ```bash
-    python3 scripts/preprocess.py --data_root data/orig --data_format frame
-    ```
-        
-    For reconstructed e2vid images, Please run the following command.
-
-    ```bash
-    python3 scripts/preprocess.py --data_root data/orig --data_format e2vid 
-    ```
-
-    You can check the preprocessed data under `data/prepocessed`
-
-
-## Evaluation
-
-### Evaluation of ModelMixSORT
-
-1. Download the [model weights](https://drive.google.com/drive/folders/1-P1HN4FZEy3ETn5rrQiMoDQx3378HLQW?usp=drive_link):
+Download the [model weights](https://drive.google.com/drive/folders/1-P1HN4FZEy3ETn5rrQiMoDQx3378HLQW?usp=drive_link):
    ```bash
+   cd <project-root>
    mkdir models
    # Download yolo_e2vid.pt, yolo_frame.pt, and XMem.pth from the provided link
    # and place them in the models directory
    ```
 
-2. Run inference:
+Afterwards, the `models` folder should be organized as follows:
 
-    ```bash
-    python3 scripts/inference.py --config configs/predict/combined.yaml
-    ```
-   We provide several config files in `configs/predict` for the different inference settings.
-   The inference script produces per sequence predictions and visualizations.
-All predictions are summarized in `final_results.json` . Each prediction follows this structure:
-
-    ```txt
-    [
-        {
-            "video_id": int, 
-            "category_id": int, 
-            "segmentations": [
-                    {
-                        "size": [int, int],
-                        "counts": "RLE encoded string or null"
-                    },
-                    ...
-                ],
-            "score": float
-        },
-        ...
-    ]
-    ```
-
-    The `final_results.json` file is also saved under the `src/TrackEval/data/trackers` folder for use with the TrackEval evaluation tool.
-
-3. Evaluate the results (based on [TrackEval](https://github.com/JonathonLuiten/TrackEval)). The general command is:
-   ```bash
-   python src/TrackEval/run_mouse_eval.py --TRACKERS_TO_EVAL <tracker_name> --SPLIT_TO_EVAL <split_name>
-   ```
-   So, if you run inference with `configs/predict/combined.yaml`, the command looks like this:
-   ```bash
-   python src/TrackEval/run_mouse_eval.py --TRACKERS_TO_EVAL combined_0.1 --SPLIT_TO_EVAL test_wo17
-   ```
-   The provided result [in the paper](https://arxiv.org/pdf/2409.03358) is Tab. 4 line 3 (w/o 1 & 7).
-
-### Evaluating Your Own Method
-
-To evaluate your own method, please generate the output in JSON format, following the structure of `final_result.json` as described in the evaluation section. Place this JSON file in `src/TrackEval/data/trackers/<your_tracker_name>/test`, where **your_tracker_name** should be replaced with the name of your own tracker. Then, run the evaluation using the command:
-
-```bash
-python src/TrackEval/run_mouse_eval.py --TRACKERS_TO_EVAL <your_tracker_name> --SPLIT_TO_EVAL <split_name>
+```txt
+models
+├── XMem.pth
+├── yolo_e2vid.pt
+└── yolo_frame.pt
 ```
 
-## Training
+### Preprocess Events
 
-To train the yolo models used in ModelMixSORT using preprocessed grayscale mice data, please run:
+This preprocessing step is required only when evaluating the ModelMixSort method from the paper. It relies on e2vid images reconstructed at the grayscale image timesteps.
 
-    python scripts/train.py --config configs/train/frame.yaml
+```bash
+python scripts/preprocess_events_to_e2vid_images.py --data_root data/MouseSIS
+```
 
-To train the yolo model using preprocessed e2vid mice data, please run:
+## Evaluation
 
-    python scripts/train.py --config configs/train/e2vid.yaml
+After downloading the data and model weights, proceed with evaluation. First run inference, e.g. our provided inference script like:
+
+```bash
+python3 scripts/inference.py --config <path-to-config-yaml>
+```
+
+This saves a file `output/<tracker-name>/final_results.json`. The file contains the predictions in this structure:
+
+```txt
+[
+  {
+    "video_id": int,
+    "score": float,
+    "instance_id": int,
+    "category_id": int,
+    "segmentations": [
+      null | {
+        "size": [int, int],
+        "counts": "RLE encoded string"
+      },
+      ...
+    ],
+  },
+  ...
+]
+```
+
+Then run the evaluation script like this:
+
+```bash
+python src/TrackEval/run_mouse_eval.py --TRACKERS_TO_EVAL <tracker-name> --SPLIT_TO_EVAL <split-name>
+```
+
+Below are specific options listed.
+
+### Quickstart Evaluation
+
+This section describes how to run a minimal evaluation workflow on one sequence of the validation set. Only download the sequence `seq_25.hdf5` from the validation set and the according annotations `val_annotations.json`. The resulting folder should look as follows:
+
+```txt
+data/MouseSIS
+│
+├── top/
+|   ├── val
+│   │   └── seq_25.hdf5
+└── val_annotations.json
+```
+
+Now you can run inference as
+
+```bash
+python3 scripts/inference.py --config configs/predict/quickstart.yaml
+```
+
+and then evaluation as
+
+```bash
+python scripts/eval.py --TRACKERS_TO_EVAL quickstart --SPLIT_TO_EVAL val
+```
+
+This should return the following results
+
+| Sequence |   HOTA   |   MOTA   |   IDF1    |
+|----------|----------|----------|-----------|
+| 25       | 30.15    | 39.125   | 35.315    |
+| **Avg.** | 30.15    | 39.125   | 35.315    |
+
+### Evaluation on Full Validation Set
+
+Similar as for quickstart but download all sequences of the validation set (sequences 3, 4, 12, 25).
+
+```bash
+python3 scripts/inference.py --config configs/predict/combined_on_validation.yaml
+python scripts/eval.py --TRACKERS_TO_EVAL combined_on_validation --SPLIT_TO_EVAL val
+```
+
+Here you should get the following results
+
+| Sequence |   HOTA   |   MOTA   |   IDF1    |
+|----------|----------|----------|-----------|
+| 3        | 54.679   | 72.432   | 60.212    |
+| 4        | 51.717   | 64.942   | 58.36     |
+| 12       | 39.497   | 66.049   | 45.431    |
+| 25       | 30.15    | 39.125   | 35.315    |
+| **Avg.** | 45.256   | 62.097   | 50.459    |
+
+### Evaluation on Test Set Without Sequences 1 & 7 (SIS Challenge)
+
+In this case, download all test sequences and run
+
+```bash
+python3 scripts/inference.py --config configs/predict/sis_challenge_baseline.yaml
+```
+
+For evaluation you can upload the `final_results.json` to the challenge/benchmark page, which results in the following combined metrics:
+
+| Sequence |   HOTA   |   MOTA   |   IDF1    |
+|----------|----------|----------|-----------|
+| **Avg.** |  0.43    |  0.45    |  0.5      |
+
+Please note that results vary slightly from the ones reported in the paper after updates for the challenge. Please refer to version v0.1.0 to reproduce the exact paper results.
 
 ## Acknowledgements
 
