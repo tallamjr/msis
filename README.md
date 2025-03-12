@@ -4,7 +4,7 @@
 [![Dataset](https://img.shields.io/badge/Dataset-GoogleDrive-4285F4.svg)](https://drive.google.com/drive/folders/1TQns9-WZw-n26FaUE3gqdAhGgrlRUzCp?usp=sharing)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice**](https://arxiv.org/pdf/2409.03358), accepted at the **Workshop on Neuromorphic Vision** in conjunction with **ECCV 2024** by [Friedhelm Hamann](https://friedhelmhamann.github.io/), [Hanxiong Li](), [Paul Mieske](https://scholar.google.de/citations?user=wQPmm6kAAAAJ&hl=de), [Lars Lewejohann](https://www.vetmed.fu-berlin.de/einrichtungen/vph/we11/mitarbeitende/lewejohann_lars3/index.html) and [Guillermo Gallego](https://sites.google.com/view/guillermogallego).
+This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice**](https://arxiv.org/pdf/2409.03358), accepted at the **Workshop on Neuromorphic Vision** in conjunction with **ECCV 2024** by [Friedhelm Hamann](https://friedhelmhamann.github.io/), [Hanxiong Li](), [Paul Mieske](https://scholar.google.de/citations?user=wQPmm6kAAAAJ&hl=de), [Lars Lewejohann](https://www.vetmed.fu-berlin.de/einrichtungen/vph/we11/mitarbeitende/lewejohann_lars3/index.html) and [Guillermo Gallego](http://www.guillermogallego.es).
 
 👀 **This dataset the base for the [SIS Challenge](https://www.codabench.org/competitions/5600/) hosted in conjunction with the [CVPR 2025 Workshop on Event-based Vision](https://tub-rip.github.io/eventvision2025/).**
 
@@ -304,21 +304,23 @@ If you find this work useful in your research, please consider citing:
 
 ```bibtex
 @inproceedings{hamann2024mousesis,
-  title={MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice},
-  author={Hamann, Friedhelm and Li, Hanxiong and Mieske, Paul and Lewejohann, Lars and Gallego, Guillermo},
-  booktitle={Proceedings of the European Conference on Computer Vision Workshops (ECCVW)},
+  title={{MouseSIS}: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice},
+  author={Friedhelm Hamann and Hanxiong Li and Paul Mieske and Lars Lewejohann and Guillermo Gallego},
+  booktitle={European Conference on Computer Vision Workshops (ECCVW)},
   year={2024}
 }
 ```
 
 ## Additional Resources
 
-- [Recording Software (CoCapture)](https://github.com/tub-rip/CoCapture)
-- [TU Berlin, RIP lab Homepage](https://sites.google.com/view/guillermogallego/research/event-based-vision)
-- [Science Of Intelligence Homepage](https://www.scienceofintelligence.de/)
-- [Event Camera Class at TU Berlin](https://sites.google.com/view/guillermogallego/teaching/event-based-robot-vision)
-- [Event-based Vision Survey Paper](http://rpg.ifi.uzh.ch/docs/EventVisionSurvey.pdf)
-- [List of Event Vision Resources](https://github.com/uzh-rpg/event-based_vision_resources)
+* [Recording Software (CoCapture)](https://github.com/tub-rip/CoCapture)
+* [Secrets of Event-Based Optical Flow (TPAMI 2024)](https://github.com/tub-rip/event_based_optical_flow)
+* [EVILIP: Event-based Image Reconstruction as a Linear Inverse Problem (TPAMI 2022)](https://github.com/tub-rip/event_based_image_rec_inverse_problem)
+* [Research page (TU Berlin, RIP lab)](https://sites.google.com/view/guillermogallego/research/event-based-vision)
+* [Science Of Intelligence Homepage](https://www.scienceofintelligence.de/)
+* [Course at TU Berlin](https://sites.google.com/view/guillermogallego/teaching/event-based-robot-vision)
+* [Survey paper](http://rpg.ifi.uzh.ch/docs/EventVisionSurvey.pdf)
+* [List of Event-based Vision Resources](https://github.com/uzh-rpg/event-based_vision_resources)
 
 ## License
 
