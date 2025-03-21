@@ -4,7 +4,7 @@
 [![Dataset](https://img.shields.io/badge/Dataset-GoogleDrive-4285F4.svg)](https://drive.google.com/drive/folders/1TQns9-WZw-n26FaUE3gqdAhGgrlRUzCp?usp=sharing)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice**](https://arxiv.org/pdf/2409.03358), accepted at the **Workshop on Neuromorphic Vision** in conjunction with **ECCV 2024** by [Friedhelm Hamann](https://friedhelmhamann.github.io/), [Hanxiong Li](), [Paul Mieske](https://scholar.google.de/citations?user=wQPmm6kAAAAJ&hl=de), [Lars Lewejohann](https://www.vetmed.fu-berlin.de/einrichtungen/vph/we11/mitarbeitende/lewejohann_lars3/index.html) and [Guillermo Gallego](http://www.guillermogallego.es).
+This is the official repository for [**MouseSIS: A Frames-and-Events Dataset for Space-Time Instance Segmentation of Mice**](https://arxiv.org/pdf/2409.03358), accepted at the **Workshop on Neuromorphic Vision** in conjunction with **ECCV 2024** by [Friedhelm Hamann](https://friedhelmhamann.github.io/), [Hanxiong Li](https://www.linkedin.com/in/hanxiong-li-1201011bb), [Paul Mieske](https://scholar.google.de/citations?user=wQPmm6kAAAAJ&hl=de), [Lars Lewejohann](https://www.vetmed.fu-berlin.de/einrichtungen/vph/we11/mitarbeitende/lewejohann_lars3/index.html) and [Guillermo Gallego](http://www.guillermogallego.es).
 
 👀 **This dataset the base for the [SIS Challenge](https://www.codabench.org/competitions/5600/) hosted in conjunction with the [CVPR 2025 Workshop on Event-based Vision](https://tub-rip.github.io/eventvision2025/).**
 
