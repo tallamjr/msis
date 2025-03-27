@@ -219,7 +219,7 @@ This saves a file `output/<tracker-name>/final_results.json`. The file contains 
 Then run the evaluation script like this:
 
 ```bash
-python src/TrackEval/run_mouse_eval.py --TRACKERS_TO_EVAL <tracker-name> --SPLIT_TO_EVAL <split-name>
+python scripts/eval.py --TRACKERS_TO_EVAL <tracker-name> --SPLIT_TO_EVAL <split-name>
 ```
 
 Below are specific options listed.
